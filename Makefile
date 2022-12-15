@@ -3,28 +3,33 @@ RACK_DIR ?= ../..
 
 include $(RACK_DIR)/arch.mk
 
-CMAKE_BUILD=dep/cmake-build
-libmy_plugin := $(CMAKE_BUILD)/libMyPlugin.a
+EXTRA_CMAKE :=
+RACK_PLUGIN := plugin.so
+ifdef ARCH_MAC
+  EXTRA_CMAKE := -DCMAKE_OSX_ARCHITECTURES="x86_64"
+  RACK_PLUGIN := plugin.dylib
+  ifdef ARCH_ARM64
+    EXTRA_CMAKE := -DCMAKE_OSX_ARCHITECTURES="arm64"
+  endif
+endif
+ifdef ARCH_WIN
+  RACK_PLUGIN := plugin.dll
+endif
 
-OBJECTS += $(libmy_plugin)
+CMAKE_BUILD=dep/cmake-build
+cmake_rack_plugin := $(CMAKE_BUILD)/$(RACK_PLUGIN)
+
+$(info cmake_rack_plugin target is '$(cmake_rack_plugin)')
 
 # trigger CMake build when running `make dep`
-DEPS += $(libmy_plugin)
+DEPS += $(cmake_rack_plugin)
 
-EXTRA_CMAKE :=
-ifdef ARCH_MAC
-ifdef ARCH_ARM64
-    EXTRA_CMAKE += -DCMAKE_OSX_ARCHITECTURES="arm64"
-else
-    EXTRA_CMAKE += -DCMAKE_OSX_ARCHITECTURES="x86_64"
-endif
-endif
-
-$(libmy_plugin): CMakeLists.txt
+$(cmake_rack_plugin): CMakeLists.txt
+	rm -rf $(RACK_PLUGIN)
 	$(CMAKE) -B$(CMAKE_BUILD) -DRACK_SDK_DIR=$(RACK_DIR) -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(CMAKE_BUILD)/dist $(EXTRA_CMAKE)
 	cmake --build $(CMAKE_BUILD) -- -j $(shell getconf _NPROCESSORS_ONLN)
 	cmake --install $(CMAKE_BUILD)
-	cp -vf $(CMAKE_BUILD)/plugin.* .
+	cp -vf $(cmake_rack_plugin) .
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

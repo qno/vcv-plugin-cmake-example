@@ -6,13 +6,4 @@ set(PLUGIN_NAME ${PROJECT_NAME})
 set(ADDITIONAL_PLUGIN_DISTRIBUTABLES README.md)
 include(RackSDK.cmake)
 
-add_library(${PLUGIN_NAME} STATIC src/MyModule.cpp)
-target_link_libraries(${PLUGIN_NAME} LINK_PUBLIC RackSDK)
-
-target_sources(${RACK_PLUGIN_LIB} PRIVATE src/plugin.cpp)
-target_link_libraries(${RACK_PLUGIN_LIB} PRIVATE ${PLUGIN_NAME})
-
-
-install(TARGETS ${RACK_PLUGIN_LIB} ${PLUGIN_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+target_sources(${RACK_PLUGIN_LIB} PRIVATE src/plugin.cpp src/MyModule.cpp)
