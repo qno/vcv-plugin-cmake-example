@@ -18,6 +18,8 @@ endif
 CMAKE_BUILD ?= dep/cmake-build
 cmake_rack_plugin := $(CMAKE_BUILD)/$(RACK_PLUGIN)
 
+# create empty plugin lib to skip the make target execution
+$(shell touch $(RACK_PLUGIN))
 $(info cmake_rack_plugin target is '$(cmake_rack_plugin)')
 
 # trigger CMake build when running `make dep`
