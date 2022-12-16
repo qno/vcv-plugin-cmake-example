@@ -4,15 +4,17 @@ include $(RACK_DIR)/arch.mk
 
 EXTRA_CMAKE :=
 RACK_PLUGIN := plugin.so
+
+ifdef ARCH_WIN
+  RACK_PLUGIN := plugin.dll
+endif
+
 ifdef ARCH_MAC
   EXTRA_CMAKE := -DCMAKE_OSX_ARCHITECTURES="x86_64"
   RACK_PLUGIN := plugin.dylib
   ifdef ARCH_ARM64
     EXTRA_CMAKE := -DCMAKE_OSX_ARCHITECTURES="arm64"
   endif
-endif
-ifdef ARCH_WIN
-  RACK_PLUGIN := plugin.dll
 endif
 
 CMAKE_BUILD ?= dep/cmake-build
@@ -33,10 +35,8 @@ $(cmake_rack_plugin): CMakeLists.txt
 rack_plugin: $(cmake_rack_plugin)
 	cp -vf $(cmake_rack_plugin) .
 
-# Add files to the ZIP package when running `make dist`
 dist: rack_plugin res
 
-# Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
