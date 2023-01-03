@@ -1,6 +1,6 @@
 # Mapping of plugin build definitions from the Rack-SDK arch.mk, compile.mk, dep.mk and plugin.mk to CMake.
 
-set(RACK_SDK_VERSION 2.2.1)
+set(RACK_SDK_VERSION 2.2.2)
 message(STATUS "Load RackSDK.cmake (mapping based on Rack-SDK-${RACK_SDK_VERSION})")
 
 if ("${RACK_SDK_DIR}" STREQUAL "")
@@ -22,7 +22,10 @@ if ("${ADDITIONAL_PLUGIN_DISTRIBUTABLES}" STREQUAL "")
 endif ()
 
 # Do not change the RACK_PLUGIN_LIB!
-set(RACK_PLUGIN_LIB plugin)
+if (${CMAKE_OSX_ARCHITECTURES} MATCHES "arm64")
+  set(RACK_PLUGIN_ARCH -arm64)
+endif ()
+set(RACK_PLUGIN_LIB plugin${RACK_PLUGIN_ARCH})
 
 file(GLOB LICENSE LICENSE*)
 set(PLUGIN_DISTRIBUTABLES plugin.json res ${LICENSE} ${ADDITIONAL_PLUGIN_DISTRIBUTABLES})
