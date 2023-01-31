@@ -1,6 +1,6 @@
 # Mapping of plugin build definitions from the Rack-SDK arch.mk, compile.mk, dep.mk and plugin.mk to CMake.
 
-set(RACK_SDK_VERSION 2.2.2)
+set(RACK_SDK_VERSION 2.2.3)
 message(STATUS "Load RackSDK.cmake (mapping based on Rack-SDK-${RACK_SDK_VERSION})")
 
 if ("${RACK_SDK_DIR}" STREQUAL "")
@@ -24,10 +24,13 @@ if ("${ADDITIONAL_PLUGIN_DISTRIBUTABLES}" STREQUAL "")
 endif ()
 
 # Do not change the RACK_PLUGIN_LIB!
-if (${CMAKE_OSX_ARCHITECTURES} MATCHES "arm64")
+if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
   set(RACK_PLUGIN_ARCH -arm64)
 endif ()
 set(RACK_PLUGIN_LIB plugin${RACK_PLUGIN_ARCH})
+
+message(STATUS "CMAKE_SYSTEM_PROCESSOR '${CMAKE_SYSTEM_PROCESSOR}'")
+message(STATUS "RACK_PLUGIN_LIB '${RACK_PLUGIN_LIB}'")
 
 file(GLOB LICENSE LICENSE*)
 set(PLUGIN_DISTRIBUTABLES plugin.json res ${LICENSE} ${ADDITIONAL_PLUGIN_DISTRIBUTABLES})
@@ -66,13 +69,13 @@ set_target_properties(${RACK_PLUGIN_LIB} PROPERTIES PREFIX "")
 
 # Since the plugin's compiler could be a different version than Rack's compiler, link libstdc++ and libgcc statically to avoid ABI issues.
 add_link_options($<$<CXX_COMPILER_ID:GNU>:-static-libstdc++> $<$<PLATFORM_ID:Linux>:-static-libgcc>)
-add_compile_options($<IF:$<STREQUAL:${CMAKE_OSX_ARCHITECTURES},arm64>,-march=armv8-a+fp+simd,-march=nehalem>)
+add_compile_options($<IF:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>,-march=armv8-a+fp+simd>,-march=nehalem)
 
 add_library(RackSDK INTERFACE)
 target_include_directories(RackSDK INTERFACE ${RACK_SDK_DIR}/include ${RACK_SDK_DIR}/dep/include)
 target_link_directories(RackSDK INTERFACE ${RACK_SDK_DIR})
 target_link_libraries(RackSDK INTERFACE Rack)
-target_compile_definitions(RackSDK INTERFACE $<IF:$<STREQUAL:${CMAKE_OSX_ARCHITECTURES},arm64>,ARCH_ARM64,ARCH_X64>)
+target_compile_definitions(RackSDK INTERFACE $<IF:$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>,ARCH_ARM64,ARCH_X64>)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   if (NOT MINGW)
@@ -82,14 +85,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   target_compile_options(RackSDK INTERFACE -municode -Wsuggest-override)
 endif ()
 
+if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
+  add_compile_options(-arch arm64)
+endif ()
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   message(STATUS "Build Mac OSX Plugin for architecture ${CMAKE_OSX_ARCHITECTURES}")
   target_compile_definitions(RackSDK INTERFACE ARCH_MAC)
   if (${CMAKE_OSX_ARCHITECTURES} MATCHES "x86_64")
     add_compile_options(-arch x86_64)
-  endif ()
-  if (${CMAKE_OSX_ARCHITECTURES} MATCHES "arm64")
-    add_compile_options(-arch arm64)
   endif ()
   set_target_properties(${RACK_PLUGIN_LIB} PROPERTIES SUFFIX ".dylib")
   set_target_properties(${RACK_PLUGIN_LIB} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
