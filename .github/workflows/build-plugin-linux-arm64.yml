@@ -50,6 +50,9 @@ jobs:
           pushd $HOME
           curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-${{ env.rack-sdk-version }}-lin-x64.zip
           unzip Rack-SDK.zip
+      - name: Install Deps
+        run: |
+          apt update && apt install -y jq curl cmake wget
       - name: Build plugin
         run: |
           export RACK_DIR=$HOME/Rack-SDK
