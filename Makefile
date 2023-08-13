@@ -4,7 +4,6 @@ include $(RACK_DIR)/arch.mk
 
 EXTRA_CMAKE :=
 RACK_PLUGIN_NAME := plugin
-RACK_PLUGIN_ARCH :=
 RACK_PLUGIN_EXT := so
 
 ifdef ARCH_WIN
@@ -16,11 +15,10 @@ ifdef ARCH_MAC
   RACK_PLUGIN_EXT := dylib
   ifdef ARCH_ARM64
     EXTRA_CMAKE := -DCMAKE_OSX_ARCHITECTURES="arm64"
-    RACK_PLUGIN_ARCH := -arm64
   endif
 endif
 
-RACK_PLUGIN := $(RACK_PLUGIN_NAME)$(RACK_PLUGIN_ARCH).$(RACK_PLUGIN_EXT)
+RACK_PLUGIN := $(RACK_PLUGIN_NAME).$(RACK_PLUGIN_EXT)
 
 CMAKE_BUILD ?= dep/cmake-build
 cmake_rack_plugin := $(CMAKE_BUILD)/$(RACK_PLUGIN)
