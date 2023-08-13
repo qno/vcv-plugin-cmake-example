@@ -34,11 +34,11 @@ jobs:
     needs: modify-plugin-version
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/qno/rack-plugin-toolchain-win-linux
+      image: ghcr.io/qno/rack-plugin-toolchain
       options: --user root
     strategy:
       matrix:
-        platform: [win-x64, lin-x64]
+        platform: [win-x64, lin-x64, mac-x64, mac-arm64]
     steps:
       - uses: actions/checkout@v3
         with:
